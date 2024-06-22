@@ -21,7 +21,7 @@
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th colspan="4" class="bg-green text-white"><h5> ELECTION TOPIC: <?php echo strtoupper($election_topic); ?></h5></th>
+                                    <th colspan="4" class="bg-red text-white"><h5> ELECTION TOPIC: <?php echo strtoupper($election_topic); ?></h5></th>
                                 </tr>
                                 <tr>
                                     <th> Photo </th>

@@ -33,6 +33,7 @@
     <div class="col-4">
         <h3>Add New Election</h3>
         <form method="POST">
+       
             <div class="form-group">
                 <input type="text" name="election_topic" placeholder="Election Topic" class="form-control" required />
             </div>
@@ -51,6 +52,7 @@
 
     <div class="col-8">
         <h3>Upcoming Elections</h3>
+        <div class= table-responsive>
         <table class="table">
             <thead>
                 <tr>
@@ -101,6 +103,7 @@
             </tbody>    
         </table>
     </div>
+</div>
 </div>
 
 <?php 

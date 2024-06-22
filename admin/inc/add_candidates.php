@@ -33,53 +33,67 @@
 
 <div class="row my-3">
     <div class="col-4">
-        <h3>Add New Candidates</h3>
+        <h3><?php echo isset($_GET['edit_id']) ? 'Edit Candidate' : 'Add New Candidates'; ?></h3>
+        <?php
+        if(isset($_GET['edit_id'])){
+            $edit_id = $_GET['edit_id'];
+            $fetchingData = mysqli_query($db, "SELECT * FROM candidate_details WHERE id = '$edit_id'") or die(mysqli_error($db));
+            $row = mysqli_fetch_assoc($fetchingData);
+            $candidate_name = $row['candidate_name'];
+            $candidate_details = $row['candidate_details'];
+            $candidate_photo = $row['candidate_photo'];
+            $election_id = $row['election_id'];
+        } else {
+            $candidate_name = $candidate_details = $candidate_photo = $election_id = '';
+        }
+        ?>
         <form method="POST" enctype="multipart/form-data">
             <div class="form-group">
-                <select class="form-control" name="election_id" required> 
-                    <option value=""> Select Election </option>
+                <select class="form-control" name="election_id" required>
+                    <option value="">Select Election</option>
                     <?php 
-                        $fetchingElections = mysqli_query($db, "SELECT * FROM elections") OR die(mysqli_error($db));
-                        $isAnyElectionAdded = mysqli_num_rows($fetchingElections);
-                        if($isAnyElectionAdded > 0)
-                        {
-                            while($row = mysqli_fetch_assoc($fetchingElections))
-                            {
-                                $election_id = $row['id'];
-                                $election_name = $row['election_topic'];
-                                $allowed_candidates = $row['no_of_candidates'];
+                    $fetchingElections = mysqli_query($db, "SELECT * FROM elections") or die(mysqli_error($db));
+                    $isAnyElectionAdded = mysqli_num_rows($fetchingElections);
+                    if($isAnyElectionAdded > 0){
+                        while($row = mysqli_fetch_assoc($fetchingElections)){
+                            $election_id_db = $row['id'];
+                            $election_name = $row['election_topic'];
+                            $allowed_candidates = $row['no_of_candidates'];
 
-                                // Now checking how many candidates are added in this election 
-                                $fetchingCandidate = mysqli_query($db, "SELECT * FROM candidate_details WHERE election_id = '". $election_id ."'") or die(mysqli_error($db));
-                                $added_candidates = mysqli_num_rows($fetchingCandidate);
+                            // Check how many candidates are added in this election 
+                            $fetchingCandidate = mysqli_query($db, "SELECT * FROM candidate_details WHERE election_id = '". $election_id_db ."'") or die(mysqli_error($db));
+                            $added_candidates = mysqli_num_rows($fetchingCandidate);
 
-                                if($added_candidates < $allowed_candidates)
-                                {
-                        ?>
-                                <option value="<?php echo $election_id; ?>"><?php echo $election_name; ?></option>
-                        <?php
-                                }
-                            }
-                        }else {
+                            if($added_candidates < $allowed_candidates || $election_id == $election_id_db){
+                                $selected = ($election_id == $election_id_db) ? 'selected' : '';
                     ?>
-                            <option value=""> Please add election first </option>
+                                <option value="<?php echo $election_id_db; ?>" <?php echo $selected; ?>><?php echo $election_name; ?></option>
                     <?php
+                            }
                         }
+                    } else {
+                    ?>
+                        <option value="">Please add election first</option>
+                    <?php
+                    }
                     ?>
                 </select>
             </div>
             <div class="form-group">
-                <input type="text" name="candidate_name" placeholder="Candidate Name" class="form-control" required />
+                <input type="text" name="candidate_name" placeholder="Candidate Name" class="form-control" value="<?php echo $candidate_name; ?>" required />
             </div>
             <div class="form-group">
-                <input type="file" name="candidate_photo" class="form-control" required />
+                <input type="file" name="candidate_photo" class="form-control" <?php echo isset($_GET['edit_id']) ? '' : 'required'; ?> />
+                <?php if(isset($_GET['edit_id']) && $candidate_photo): ?>
+                    <img src="<?php echo $candidate_photo; ?>" alt="Current Photo" style="width: 100px; height: auto;">
+                <?php endif; ?>
             </div>
             <div class="form-group">
-                <input type="text" name="candidate_details" placeholder="Candidate Details" class="form-control" required />
+                <input type="text" name="candidate_details" placeholder="Candidate Details" class="form-control" value="<?php echo $candidate_details; ?>" required />
             </div>
-            <input type="submit" value="Add Candidate" name="addCandidateBtn" class="btn btn-success" />
+            <input type="submit" value="<?php echo isset($_GET['edit_id']) ? 'Update Candidate' : 'Add Candidate'; ?>" name="<?php echo isset($_GET['edit_id']) ? 'updateCandidateBtn' : 'addCandidateBtn'; ?>" class="btn btn-success" />
         </form>
-    </div>   
+    </div>
 
     <div class="col-8">
         <h3>Candidate Details</h3>
@@ -91,111 +105,124 @@
                     <th scope="col">Name</th>
                     <th scope="col">Details</th>
                     <th scope="col">Election</th>
-                    <th scope="col">Action </th>
-                    
+                    <th scope="col">Action</th>
                 </tr>
             </thead>
             <tbody>
                 <?php 
-                    $fetchingData = mysqli_query($db, "SELECT * FROM candidate_details") or die(mysqli_error($db)); 
-                    $isAnyCandidateAdded = mysqli_num_rows($fetchingData);
+                $fetchingData = mysqli_query($db, "SELECT * FROM candidate_details") or die(mysqli_error($db));
+                $isAnyCandidateAdded = mysqli_num_rows($fetchingData);
 
-                    if($isAnyCandidateAdded > 0)
-                    {
-                        $sno = 1;
-                        while($row = mysqli_fetch_assoc($fetchingData))
-                        {
-                            $election_id = $row['election_id'];
-                            $fetchingElectionName = mysqli_query($db, "SELECT * FROM elections WHERE id = '". $election_id ."'") or die(mysqli_error($db));
-                            $execFetchingElectionNameQuery = mysqli_fetch_assoc($fetchingElectionName);
-                            $election_name = $execFetchingElectionNameQuery['election_topic'];
-
-                            $candidate_photo = $row['candidate_photo'];
-
+                if($isAnyCandidateAdded > 0){
+                    $sno = 1;
+                    while($row = mysqli_fetch_assoc($fetchingData)){
+                        $c_id = $row['id'];
+                        $election_id = $row['election_id'];
+                        $fetchingElectionName = mysqli_query($db, "SELECT * FROM elections WHERE id = '". $election_id ."'") or die(mysqli_error($db));
+                        $execFetchingElectionNameQuery = mysqli_fetch_assoc($fetchingElectionName);
+                        $election_name = $execFetchingElectionNameQuery['election_topic'];
+                        $candidate_photo = $row['candidate_photo'];
                 ?>
-                            <tr>
-                                <td><?php echo $sno++; ?></td>
-                                <td> <img src="<?php echo $candidate_photo; ?>" class="candidate_photo" />    </td>
-                                <td><?php echo $row['candidate_name']; ?></td>
-                                <td><?php echo $row['candidate_details']; ?></td>
-                                <td><?php echo $election_name; ?></td>
-                                <td> 
-                                    <a href="#" class="btn btn-sm btn-warning"> Edit </a>
-                                    <a href="#" class="btn btn-sm btn-danger"> Delete </a>
-                                </td>
-                            </tr>   
-                <?php
-                        }
-                    }else {
-            ?>
-                        <tr> 
-                            <td colspan="7"> No any candidate is added yet. </td>
+                        <tr>
+                            <td><?php echo $sno++; ?></td>
+                            <td><img src="<?php echo $candidate_photo; ?>" class="candidate_photo" style="width: 50px; height: auto;" /></td>
+                            <td><?php echo $row['candidate_name']; ?></td>
+                            <td><?php echo $row['candidate_details']; ?></td>
+                            <td><?php echo $election_name; ?></td>
+                            <td>
+                                <a href="index.php?addCandidatePage=1&edit_id=<?php echo $c_id; ?>" class="btn btn-sm btn-warning">Edit</a>
+                                <a href="#" class="btn btn-sm btn-danger">Delete</a>
+                            </td>
                         </tr>
-            <?php
+                <?php
                     }
+                } else {
                 ?>
-            </tbody>    
+                    <tr>
+                        <td colspan="6">No candidate has been added yet.</td>
+                    </tr>
+                <?php
+                }
+                ?>
+            </tbody>
         </table>
     </div>
 </div>
 
+<?php
+if(isset($_POST['addCandidateBtn'])){
+    $election_id = mysqli_real_escape_string($db, $_POST['election_id']);
+    $candidate_name = mysqli_real_escape_string($db, $_POST['candidate_name']);
+    $candidate_details = mysqli_real_escape_string($db, $_POST['candidate_details']);
+    $inserted_by = $_SESSION['username'];
+    $inserted_on = date("Y-m-d");
 
+    // Photograph Logic Starts
+    $targetted_folder = "../assets/images/candidate_photos/";
+    $candidate_photo = $targetted_folder . rand(111111111, 99999999999) . "_" . rand(111111111, 99999999999) . $_FILES['candidate_photo']['name'];
+    $candidate_photo_tmp_name = $_FILES['candidate_photo']['tmp_name'];
+    $candidate_photo_type = strtolower(pathinfo($candidate_photo, PATHINFO_EXTENSION));
+    $allowed_types = array("jpg", "png", "jpeg");
+    $image_size = $_FILES['candidate_photo']['size'];
 
-<?php 
+    if($image_size < 2000000){ // 2 MB
+        if(in_array($candidate_photo_type, $allowed_types)){
+            if(move_uploaded_file($candidate_photo_tmp_name, $candidate_photo)){
+                // inserting into db
+                mysqli_query($db, "INSERT INTO candidate_details(election_id, candidate_name, candidate_details, candidate_photo, inserted_by, inserted_on) VALUES('$election_id', '$candidate_name', '$candidate_details', '$candidate_photo', '$inserted_by', '$inserted_on')") or die(mysqli_error($db));
+                echo "<script> location.assign('index.php?addCandidatePage=1&added=1'); </script>";
+            } else {
+                echo "<script> location.assign('index.php?addCandidatePage=1&failed=1'); </script>";
+            }
+        } else {
+            echo "<script> location.assign('index.php?addCandidatePage=1&invalidFile=1'); </script>";
+        }
+    } else {
+        echo "<script> location.assign('index.php?addCandidatePage=1&largeFile=1'); </script>";
+    }
+    // Photograph Logic Ends
+}
 
-    if(isset($_POST['addCandidateBtn']))
-    {
-        $election_id = mysqli_real_escape_string($db, $_POST['election_id']);
-        $candidate_name = mysqli_real_escape_string($db, $_POST['candidate_name']);
-        $candidate_details = mysqli_real_escape_string($db, $_POST['candidate_details']);
-        $inserted_by = $_SESSION['username'];
-        $inserted_on = date("Y-m-d");
+// Edit candidate
+if(isset($_POST['updateCandidateBtn'])){
+    $election_id = mysqli_real_escape_string($db, $_POST['election_id']);
+    $candidate_name = mysqli_real_escape_string($db, $_POST['candidate_name']);
+    $candidate_details = mysqli_real_escape_string($db, $_POST['candidate_details']);
+    $edit_id = $_GET['edit_id'];
 
-        // Photograph Logic Starts
+    // Photograph Logic Starts
+    if(isset($_FILES['candidate_photo']['name']) && $_FILES['candidate_photo']['name'] != ""){
         $targetted_folder = "../assets/images/candidate_photos/";
         $candidate_photo = $targetted_folder . rand(111111111, 99999999999) . "_" . rand(111111111, 99999999999) . $_FILES['candidate_photo']['name'];
         $candidate_photo_tmp_name = $_FILES['candidate_photo']['tmp_name'];
         $candidate_photo_type = strtolower(pathinfo($candidate_photo, PATHINFO_EXTENSION));
-        $allowed_types = array("jpg", "png", "jpeg");        
+        $allowed_types = array("jpg", "png", "jpeg");
         $image_size = $_FILES['candidate_photo']['size'];
 
-        if($image_size < 2000000) // 2 MB
-        {
-            if(in_array($candidate_photo_type, $allowed_types))
-            {
-                if(move_uploaded_file($candidate_photo_tmp_name, $candidate_photo))
-                {
-                    // inserting into db
-                    mysqli_query($db, "INSERT INTO candidate_details(election_id, candidate_name, candidate_details, candidate_photo, inserted_by, inserted_on) VALUES('". $election_id ."', '". $candidate_name ."', '". $candidate_details ."', '". $candidate_photo ."', '". $inserted_by ."', '". $inserted_on ."')") or die(mysqli_error($db));
-
-                    echo "<script> location.assign('index.php?addCandidatePage=1&added=1'); </script>";
-
-
-                }else {
-                    echo "<script> location.assign('index.php?addCandidatePage=1&failed=1'); </script>";                    
+        if($image_size < 2000000){ // 2 MB
+            if(in_array($candidate_photo_type, $allowed_types)){
+                if(move_uploaded_file($candidate_photo_tmp_name, $candidate_photo)){
+                    // Updating with new photo
+                    $updateQuery = "UPDATE candidate_details SET election_id='$election_id', candidate_name='$candidate_name', candidate_details='$candidate_details', candidate_photo='$candidate_photo' WHERE id='$edit_id'";
+                } else {
+                    echo "<script> location.assign('index.php?addCandidatePage=1&failed=1'); </script>";
                 }
-            }else {
+            } else {
                 echo "<script> location.assign('index.php?addCandidatePage=1&invalidFile=1'); </script>";
             }
-        }else {
+        } else {
             echo "<script> location.assign('index.php?addCandidatePage=1&largeFile=1'); </script>";
         }
-
-        // Photograph Logic Ends
-        
-
-
-
-
-        
-    ?>
-      <?php
-
+    } else {
+        // Updating without new photo
+        $updateQuery = "UPDATE candidate_details SET election_id='$election_id', candidate_name='$candidate_name', candidate_details='$candidate_details' WHERE id='$edit_id'";
     }
 
-
-
-
-
-
+    // Run the update query
+    if(isset($updateQuery)){
+        mysqli_query($db, $updateQuery) or die(mysqli_error($db));
+        echo "<script> location.assign('index.php?addCandidatePage=1&updated=1'); </script>";
+    }
+    // Photograph Logic Ends
+}
 ?>

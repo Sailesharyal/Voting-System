@@ -157,7 +157,7 @@
                 ?>
                         <span class="bg-white text-danger text-center my-3"> Invalid username or password! </span>
                 <?php
-                    }
+                    }   
                 ?>
                        
 			</div>
