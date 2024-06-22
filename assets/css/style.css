@@ -16,4 +16,43 @@
     border: 2px solid #c0392b;
     border-radius: 100%;
 }
+@media (max-width: 768px) {
+    /* Make the table horizontally scrollable on smaller screens */
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    table th, table td {
+        font-size: 12px;
+        padding: 5px;
+    }
+
+    .candidate_photo {
+        width: 40px;
+    }
+
+    .bg-red {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Stack the elements vertically on the smallest screens */
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    table th, table td {
+        font-size: 10px;
+        padding: 3px;
+    }
+
+    .candidate_photo {
+        width: 30px;
+    }
+
+    .bg-red {
+        font-size: 12px;
+    }
+}
 

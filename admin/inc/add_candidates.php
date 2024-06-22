@@ -1,38 +1,39 @@
 <?php 
-    if(isset($_GET['added']))
-    {
+    if(isset($_GET['added'])) {
 ?>
         <div class="alert alert-success my-3" role="alert">
             Candidate has been added successfully.
         </div>
 <?php 
-    }else if(isset($_GET['largeFile'])) {
+    } else if(isset($_GET['largeFile'])) {
 ?>
         <div class="alert alert-danger my-3" role="alert">
-            Candidate image is too large, please upload small file (you can upload any image upto 2mbs.).
+            Candidate image is too large, please upload a smaller file (you can upload any image up to 2MB).
         </div>
 <?php
-    }else if(isset($_GET['invalidFile']))
-    {
+    } else if(isset($_GET['invalidFile'])) {
 ?>
         <div class="alert alert-danger my-3" role="alert">
-            Invalid image type (Only .jpg, .png files are allowed) .
+            Invalid image type (Only .jpg, .png files are allowed).
         </div>
 <?php
-    }else if(isset($_GET['failed']))
-    {
+    } else if(isset($_GET['failed'])) {
 ?>
         <div class="alert alert-danger my-3" role="alert">
             Image uploading failed, please try again.
         </div>
 <?php
+    } else if(isset($_GET['deleted'])) {
+?>
+        <div class="alert alert-danger my-3" role="alert">
+            Candidate has been deleted successfully.
+        </div>
+<?php
     }
-
 ?>
 
-
 <div class="row my-3">
-    <div class="col-4">
+    <div class="col-md-4">
         <h3><?php echo isset($_GET['edit_id']) ? 'Edit Candidate' : 'Add New Candidates'; ?></h3>
         <?php
         if(isset($_GET['edit_id'])){
@@ -73,7 +74,7 @@
                         }
                     } else {
                     ?>
-                        <option value="">Please add election first</option>
+                        <option value="">Please add an election first</option>
                     <?php
                     }
                     ?>
@@ -95,57 +96,59 @@
         </form>
     </div>
 
-    <div class="col-8">
+    <div class="col-md-8">
         <h3>Candidate Details</h3>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">S.No</th>
-                    <th scope="col">Photo</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">Details</th>
-                    <th scope="col">Election</th>
-                    <th scope="col">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php 
-                $fetchingData = mysqli_query($db, "SELECT * FROM candidate_details") or die(mysqli_error($db));
-                $isAnyCandidateAdded = mysqli_num_rows($fetchingData);
-
-                if($isAnyCandidateAdded > 0){
-                    $sno = 1;
-                    while($row = mysqli_fetch_assoc($fetchingData)){
-                        $c_id = $row['id'];
-                        $election_id = $row['election_id'];
-                        $fetchingElectionName = mysqli_query($db, "SELECT * FROM elections WHERE id = '". $election_id ."'") or die(mysqli_error($db));
-                        $execFetchingElectionNameQuery = mysqli_fetch_assoc($fetchingElectionName);
-                        $election_name = $execFetchingElectionNameQuery['election_topic'];
-                        $candidate_photo = $row['candidate_photo'];
-                ?>
-                        <tr>
-                            <td><?php echo $sno++; ?></td>
-                            <td><img src="<?php echo $candidate_photo; ?>" class="candidate_photo" style="width: 50px; height: auto;" /></td>
-                            <td><?php echo $row['candidate_name']; ?></td>
-                            <td><?php echo $row['candidate_details']; ?></td>
-                            <td><?php echo $election_name; ?></td>
-                            <td>
-                                <a href="index.php?addCandidatePage=1&edit_id=<?php echo $c_id; ?>" class="btn btn-sm btn-warning">Edit</a>
-                                <a href="#" class="btn btn-sm btn-danger">Delete</a>
-                            </td>
-                        </tr>
-                <?php
-                    }
-                } else {
-                ?>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
                     <tr>
-                        <td colspan="6">No candidate has been added yet.</td>
+                        <th scope="col">S.No</th>
+                        <th scope="col">Photo</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Details</th>
+                        <th scope="col">Election</th>
+                        <th scope="col">Action</th>
                     </tr>
-                <?php
-                }
-                ?>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    <?php 
+                    $fetchingData = mysqli_query($db, "SELECT * FROM candidate_details") or die(mysqli_error($db));
+                    $isAnyCandidateAdded = mysqli_num_rows($fetchingData);
+
+                    if($isAnyCandidateAdded > 0){
+                        $sno = 1;
+                        while($row = mysqli_fetch_assoc($fetchingData)){
+                            $c_id = $row['id'];
+                            $election_id = $row['election_id'];
+                            $fetchingElectionName = mysqli_query($db, "SELECT * FROM elections WHERE id = '". $election_id ."'") or die(mysqli_error($db));
+                            $execFetchingElectionNameQuery = mysqli_fetch_assoc($fetchingElectionName);
+                            $election_name = $execFetchingElectionNameQuery['election_topic'];
+                            $candidate_photo = $row['candidate_photo'];
+                    ?>
+                            <tr>
+                                <td><?php echo $sno++; ?></td>
+                                <td><img src="<?php echo $candidate_photo; ?>" class="candidate_photo" style="width: 50px; height: auto;" /></td>
+                                <td><?php echo $row['candidate_name']; ?></td>
+                                <td><?php echo $row['candidate_details']; ?></td>
+                                <td><?php echo $election_name; ?></td>
+                                <td>
+                                    <a href="index.php?addCandidatePage=1&edit_id=<?php echo $c_id; ?>" class="btn btn-sm btn-warning">Edit</a>
+                                    <button class="btn btn-sm btn-danger" onclick="DeleteData(<?php echo $c_id;?>)">Delete</button>
+                                </td>
+                            </tr>
+                    <?php
+                        }
+                    } else {
+                    ?>
+                        <tr>
+                            <td colspan="6">No candidate has been added yet.</td>
+                        </tr>
+                    <?php
+                    }
+                    ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -225,4 +228,19 @@ if(isset($_POST['updateCandidateBtn'])){
     }
     // Photograph Logic Ends
 }
+
+// Delete candidate
+if(isset($_GET['delete_id'])){
+    $delete_id = $_GET['delete_id'];
+    mysqli_query($db, "DELETE FROM candidate_details WHERE id = '$delete_id'") or die(mysqli_error($db));
+    echo "<script> location.assign('index.php?addCandidatePage=1&deleted=1'); </script>";
+}
 ?>
+
+<script>
+function DeleteData(id) {
+    if (confirm("Are you sure you want to delete this candidate?")) {
+        window.location.href = 'index.php?addCandidatePage=1&delete_id=' + id;
+    }
+}
+</script>
