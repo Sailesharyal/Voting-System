@@ -1,5 +1,5 @@
 <?php 
-    require_once("admin/inc/config.php");
+    require_once("admin/include/config.php");
 
     $fetchingElections = mysqli_query($db, "SELECT * FROM elections") OR die(mysqli_error($db));
     while($data = mysqli_fetch_assoc($fetchingElections))
@@ -171,7 +171,7 @@
 </html>
 
 <?php 
-    require_once("admin/inc/config.php");
+    require_once("admin/include/config.php");
 
     if(isset($_POST['sign_up_btn']))
     {

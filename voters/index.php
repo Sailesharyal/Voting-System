@@ -1,6 +1,6 @@
 <?php 
-    require_once("inc/header.php");
-    require_once("inc/navigation.php");
+    require_once("include/header.php");
+    require_once("include/navigation.php");
 ?>
 
     <div class="row my-3">
@@ -101,7 +101,7 @@
     {
         $.ajax({
             type: "POST", 
-            url: "inc/ajaxCalls.php",
+            url: "include/ajaxCalls.php",
             data: "e_id=" + election_id + "&c_id=" + customer_id + "&v_id=" + voters_id, 
             success: function(response) {
                 
@@ -120,5 +120,5 @@
 
 
 <?php
-    require_once("inc/footer.php");
+    require_once("include/footer.php");
 ?>

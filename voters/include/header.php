@@ -1,10 +1,10 @@
 <?php 
     session_start();
-    require_once("../admin/inc/config.php");
+    require_once("../admin/include/config.php");
 
     if($_SESSION['key'] != "VotersKey")
     {
-        echo "<script> location.assign('../admin/inc/logout.php'); </script>";
+        echo "<script> location.assign('../admin/include/logout.php'); </script>";
         die;
     }
 ?>
