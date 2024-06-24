@@ -25,7 +25,7 @@
             align-items: center;
             flex-wrap: wrap;
         }
-        .header img {
+        .header img {   
             max-width: 100%;
             height: auto;
         }
